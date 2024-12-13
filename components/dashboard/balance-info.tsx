@@ -29,7 +29,7 @@ import { useCurrentUser } from "@/hooks/useCurrentUser";
 export function BalanceInfo() {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("USDT.BEP20");
-  const user = useCurrentUser();
+  const { user } = useCurrentUser();
   const { tokenPrice, handleBuy, error, isLoading, buyError } =
     useTokenPurchase();
 

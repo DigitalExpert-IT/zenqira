@@ -26,7 +26,7 @@ export const updateAddressWallet = async (
   try {
     const updatedUser = await db.user.update({
       where: { id: userId },
-      data: { walletAddress },
+      data: walletAddress,
     });
 
     return {
