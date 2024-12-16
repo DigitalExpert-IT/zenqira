@@ -1,8 +1,8 @@
-FROM --platform=linux/amd64 node:20-alpine AS base
+FROM --platform=linux/amd64 node:18-alpine AS base
 
 # Install dependencies only when needed
 FROM base AS deps
-# Install necessary system dependencies
+# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
 RUN apk add --no-cache libc6-compat
 RUN apk add --update --no-cache python3 && ln -sf python3 /usr/bin/python
 RUN apk add --no-cache g++ make
@@ -17,13 +17,13 @@ RUN \
   else echo "Lockfile not found." && exit 1; \
   fi
 
+
 # Rebuild the source code only when needed
 FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
-# Build-time arguments for environment variables
 ARG BASE_URL
 ARG AUTH_SECRET
 ARG RESEND_API_KEY
@@ -37,7 +37,6 @@ ARG COINPAYMENTS_API_SECRET
 ARG OWNER_USDT_ADDRESS
 ARG OWNER_TRC_ADDRESS
 
-# Set environment variables during build
 ENV BASE_URL=${BASE_URL}
 ENV AUTH_SECRET=${AUTH_SECRET}
 ENV RESEND_API_KEY=${RESEND_API_KEY}
@@ -51,48 +50,36 @@ ENV COINPAYMENTS_API_SECRET=${COINPAYMENTS_API_SECRET}
 ENV OWNER_USDT_ADDRESS=${OWNER_USDT_ADDRESS}
 ENV OWNER_TRC_ADDRESS=${OWNER_TRC_ADDRESS}
 
-# Disable Next.js telemetry during build
+# Next.js collects completely anonymous telemetry data about general usage.
+# Learn more here: https://nextjs.org/telemetry
+# Uncomment the following line in case you want to disable telemetry during the build.
 ENV NEXT_TELEMETRY_DISABLED 1
-
-# Generate Prisma client and build the application
 RUN yarn prisma generate
 RUN yarn build
 
-# Production image
+# If using npm comment out above and use below instead
+# RUN npm run build
+
+# Production image, copy all the files and run next
 FROM base AS runner
 WORKDIR /app
 
 ENV NODE_ENV production
+# Uncomment the following line in case you want to disable telemetry during runtime.
 ENV NEXT_TELEMETRY_DISABLED 1
 
-# Create non-root user for security
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
 
-# Copy public files
 COPY --from=builder /app/public ./public
 
-# Copy standalone and static files
+# Automatically leverage output traces to reduce image size
+# https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY prisma /app/prisma
 
-# Copy Prisma files
-COPY --from=builder /app/prisma /app/prisma
-COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
-COPY --from=builder /app/node_modules/@prisma ./node_modules/@prisma
-
-# Set permissions
-RUN chown -R nextjs:nodejs /app
-
-# Switch to non-root user
 USER nextjs
 
-# Expose port (changed to 3000 as per Next.js default)
-EXPOSE 9000
-
-# Set port environment variable
-ENV PORT 9000
-ENV HOSTNAME "0.0.0.0"
-
-# Run the application
+ENV PORT 80
 CMD ["node", "server.js"]
