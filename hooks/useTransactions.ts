@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
 
 export interface Transaction {
   id: string;
@@ -23,6 +24,7 @@ interface UseTransactionsHook {
   currentPage: number;
   omzet: number;
   refetch: (page?: number) => void;
+  changeTxStatus: (txId: string) => void;
 }
 
 export const useTransactions = (
@@ -81,6 +83,31 @@ export const useTransactions = (
     [page, pageLimit, session]
   );
 
+  const changeTxStatus = async (txId: string) => {
+    try {
+      const response = await fetch('/api/bypass-buy', {
+        method: "POST",
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id: txId }),
+      })
+
+      if (!response.ok) {
+        throw new Error('Failed to change status transaction');
+      }
+
+      const data = await response.json();
+      console.log("bypass buy: ", data);
+      toast.success("Success bypass buy");
+    } catch (err) {
+      console.error(err);
+      toast.error("Error bypass buy");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchTransactions();
   }, [session?.user, page, fetchTransactions]);
@@ -100,5 +127,6 @@ export const useTransactions = (
     currentPage,
     omzet,
     refetch,
+    changeTxStatus,
   };
 };

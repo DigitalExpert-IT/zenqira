@@ -33,28 +33,48 @@ export async function GET(request: NextRequest) {
 
     const totalTransactionValue = isAdmin
       ? await db.transaction.aggregate({
-          _sum: {
-            value: true,
-          },
-          where: whereClauseCount,
-        })
+        _sum: {
+          value: true,
+        },
+        where: whereClauseCount,
+      })
       : null;
 
-    const transactions = await db.transaction.findMany({
-      where: whereClause,
-      include: {
-        user: {
-          select: {
-            email: true,
+    let transactions;
+
+    if (!isAdmin) {
+      transactions = await db.transaction.findMany({
+        where: whereClause,
+        include: {
+          user: {
+            select: {
+              email: true,
+            },
           },
         },
-      },
-      skip: (page - 1) * limit,
-      take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    } else {
+      transactions = await db.transaction.findMany({
+        include: {
+          user: {
+            select: {
+              email: true,
+            },
+          },
+        },
+        skip: (page - 1) * limit,
+        take: limit,
+        orderBy: {
+          createdAt: "desc",
+        },
+      });
+    }
+
 
     return NextResponse.json({
       transactions,
