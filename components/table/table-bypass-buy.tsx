@@ -7,11 +7,11 @@ import Link from "next/link";
 import Table from "../ui/table";
 import { Badge } from "../ui/badge";
 import Pagination from "../pagination";
-import { usePaymentStatus } from "@/hooks/usePaymentStatus";
 import { useTransactions } from "@/hooks/useTransactions";
 import { TransactionStatus } from "@prisma/client";
 
 export interface IUserTransaction {
+  id: string;
   txnId: string;
   transactionDate: string;
   amount: number;
@@ -24,7 +24,7 @@ export interface IUserTransaction {
 const columnHelper = createColumnHelper<IUserTransaction>();
 
 export const TableByPass = () => {
-  const { transactions, changeTxStatus } = useTransactions();
+  const { transactions, changeTxStatus, refetch } = useTransactions();
 
   const columns = useMemo(
     () => [
@@ -70,13 +70,13 @@ export const TableByPass = () => {
       }),
       columnHelper.accessor("action", {
         cell: (info) => {
-          const rowId = info.row.original.txnId;
+          const rowId = info.row.original.id;
           return (
             <button
               onClick={() => changeTxStatus(rowId)}
               className="focus:outline-none text-white bg-purple-700 hover:bg-purple-800 focus:ring-4 focus:ring-purple-300 font-medium rounded-lg text-sm px-5 py-2.5 mb-2 dark:bg-purple-600 dark:hover:bg-purple-700 dark:focus:ring-purple-900"
             >
-              Approve
+              Sikat!
             </button>
           );
         },
@@ -92,6 +92,7 @@ export const TableByPass = () => {
     return transactions
       .filter(item => item.type?.toLowerCase() === "deposit")
       .map(item => ({
+        id: item.id,
         txnId: item.txnId || "",
         amount: item.valueToken || 0,
         status: item.status || "",
@@ -115,6 +116,7 @@ export const TableByPass = () => {
 
   return (
     <div className="p-5 space-y-4">
+      <h2 className="text-white text-2xl font-bold">Bypass Buy</h2>
       <div>
         <Table data={currentItems} columns={columns} />
       </div>

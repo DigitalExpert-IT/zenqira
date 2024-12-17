@@ -17,13 +17,10 @@ export async function POST(req: NextRequest) {
 
       if (!txId) return NextResponse.json({ error: "Required Transaction Id" }, { status: 500 });
 
-      console.log("req: ", await req.json());
-
       const tx = await prisma.transaction.update({ where: { id: txId }, data: { status: "SUCCESS" } });
 
       return NextResponse.json(tx, { status: 201 });
     } catch (error) {
-      console.log(error);
       return NextResponse.json(
         { error: `Failed to bypass buy: ${error}` },
         { status: 500 }
