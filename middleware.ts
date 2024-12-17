@@ -12,6 +12,9 @@ import {
 import { NextResponse } from "next/server";
 import { UserRole } from "@prisma/client";
 
+const API_KEY = process.env.API_KEY || 'bqkf1TahACefG1joVUObekI+YJVeBXuKlDdJ03M9wAs=';
+const WHITELIST_URL = ["http://www.pycho.tech"];
+
 const { auth } = NextAuth(authConfig);
 
 //@ts-ignore
@@ -19,6 +22,22 @@ export default auth(async req => {
   const { nextUrl } = req;
   const isLoggedIn = !!req.auth;
   const user = await getToken({ req, secret: process.env.AUTH_SECRET });
+
+  const origin = req.headers.get('Access-Control-Allow-Origin') || "";
+  const fetchSite = req.headers.get("Sec-Fetch-Site");
+  const isSameOrigin = fetchSite === "same-origin" || fetchSite === "same-site";
+
+  // API KEY Validation only on Api routes
+  if (req.nextUrl.pathname.includes("/api") && !isSameOrigin && !WHITELIST_URL.includes(origin)) {
+    const apiKey = req.headers.get('X-Api-Key');
+
+    if (apiKey !== API_KEY) {
+      return new NextResponse(
+        JSON.stringify({ message: 'Forbidden: Invalid API Key' }),
+        { status: 403, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
+  }
 
   const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.includes(nextUrl.pathname);
