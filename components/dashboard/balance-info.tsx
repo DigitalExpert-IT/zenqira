@@ -24,12 +24,14 @@ import {
 } from "@/components/ui/select";
 import { UserBalanceCard } from "../card";
 import { useCurrentUser } from "@/hooks/useCurrentUser";
+import { useBalances } from "@/hooks/useBalance";
 
 
 export function BalanceInfo() {
   const [amount, setAmount] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("USDT.BEP20");
   const { user } = useCurrentUser();
+  const { isLoading: balancesLoading, balances } = useBalances();
   const { tokenPrice, handleBuy, error, isLoading, buyError } =
     useTokenPurchase();
 
@@ -41,7 +43,7 @@ export function BalanceInfo() {
   return (
     <div className="mx-auto p-4 sm:p-6 md:p-5 mt-4 sm:mt-6 md:mt-10">
       <div className="grid gap-4 sm:gap-5 md:gap-6 grid-cols-1 md:grid-cols-3">
-        <UserBalanceCard />
+        <UserBalanceCard balances={balances} balancesLoading={balancesLoading} />
         {user?.role === "ADMIN" ? null :
           <Card className="md:col-span-2 bg-slate-800 text-white border-gray-700 w-full">
             <CardHeader>

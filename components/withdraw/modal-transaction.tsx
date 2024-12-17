@@ -2,7 +2,9 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { IUserTransaction } from "@/constant/userTransaction";
 import { Dialog, DialogTrigger, DialogContent, DialogTitle } from "../ui/dialog";
-import { usePostWithdrawal } from "@/hooks/useWithdrawals";
+import { useWithdrawal } from "@/hooks/useWithdrawals";
+import { Badge } from "../ui/badge";
+import { TransactionStatus } from "@prisma/client";
 
 type ModalProps = {
   onClose: () => void;
@@ -10,7 +12,7 @@ type ModalProps = {
 };
 
 export const ModalWithdraw = ({ onClose, transaction }: ModalProps) => {
-  const { approveWithdrawal } = usePostWithdrawal();
+  const { approveWithdrawal } = useWithdrawal();
   const { register, handleSubmit, formState: { errors } } = useForm<IUserTransaction>({
     defaultValues: {
       txHash: transaction.txHash
@@ -55,7 +57,7 @@ export const ModalWithdraw = ({ onClose, transaction }: ModalProps) => {
               >
                 Address Wallet
               </label>
-              <span>{transaction?.addressWallet}</span>
+              <span>{transaction?.user?.walletAddress}</span>
             </div>
             <div>
               <label
@@ -73,7 +75,15 @@ export const ModalWithdraw = ({ onClose, transaction }: ModalProps) => {
               >
                 Status
               </label>
-              <span>{transaction?.status}</span>
+              <div className="min-w-[13rem] font-bold text-md capitalize">
+                <Badge
+                  variant={
+                    transaction?.status === TransactionStatus.REJECTED ? "destructive" : transaction?.status === TransactionStatus.PENDING ? "warning" : "success"
+                  }
+                >
+                  {transaction?.status}
+                </Badge>
+              </div>
             </div>
             <div>
               <label

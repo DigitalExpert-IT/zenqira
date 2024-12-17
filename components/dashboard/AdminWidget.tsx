@@ -37,21 +37,19 @@ export function AdminWidget() {
             </h2>
             <div className="flex flex-row gap-2">
               <p
-                className={`text-2xl sm:text-3xl font-bold ${
-                  price?.priceChange && price?.priceChange >= 0
+                className={`text-2xl sm:text-3xl font-bold ${price?.priceChange && price?.priceChange >= 0
                     ? "text-green-500"
                     : "text-red-500"
-                }`}
+                  }`}
               >
                 {formatPrice(tokenPrice)}
               </p>
               {price.priceChange !== null && (
                 <div
-                  className={`flex items-center ${
-                    price?.priceChange && price?.priceChange >= 0
+                  className={`flex items-center ${price?.priceChange && price?.priceChange >= 0
                       ? "text-green-500"
                       : "text-red-500"
-                  }`}
+                    }`}
                 >
                   {price?.priceChange && price?.priceChange >= 0 ? (
                     <ArrowUpCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
@@ -74,7 +72,7 @@ export function AdminWidget() {
             Total Turnover
           </h2>
           <p className="text-md md:text-2xl font-bold table-row md:table-cell text-center md:text-right">
-            {omzet !== null && !isLoading ? `${omzet} USD` : <BeatLoader />}
+            {isLoading ? <BeatLoader /> : omzet !== null ? `${omzet} USD` : "0 USD"}
           </p>
         </div>
         <div className="flex-1 bg-gradient-to-r table from-blue-500 to-purple-600 text-white p-4 rounded-xl">

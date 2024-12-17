@@ -123,7 +123,6 @@ export async function POST(req: NextRequest) {
 
       return NextResponse.json(withdraw, { status: 201 });
     } catch (error) {
-      // console.error("Error creating withdrawal:", error);
       return NextResponse.json(
         { error: `Failed to create withdrawal: ${error}` },
         { status: 500 }

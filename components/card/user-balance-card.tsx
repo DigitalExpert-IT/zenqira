@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useBalances } from "@/hooks/useBalance";
+import { Balances } from "@/hooks/useBalance";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useTokenPurchase } from "@/hooks/useTokenPurchase";
 import { ArrowDownCircle, ArrowUpCircle } from "lucide-react";
@@ -12,9 +12,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { useMemo } from "react";
 
-export function UserBalanceCard() {
-  const { isLoading: balancesLoading, balances } = useBalances();
+interface IUserBalanceCard {
+  balancesLoading: boolean;
+  balances: Balances | null;
+}
+
+export function UserBalanceCard({ balancesLoading, balances }: IUserBalanceCard) {
   const { tokenPrice, error, prevPrice, isLoading } = useTokenPurchase();
 
   const priceChange =
@@ -34,10 +39,10 @@ export function UserBalanceCard() {
     }).format(price);
   };
 
-  const calculateTokenAmount = () => {
+  const calculateTokenAmount = useMemo(() => {
     if (!balances || !tokenPrice) return "0";
     return (Number(balances.totalValueToken) * tokenPrice).toFixed(2);
-  };
+  }, [balances, tokenPrice]);
 
   return (
     <Card className="bg-slate-800 text-white border-gray-700 w-full">
@@ -59,9 +64,8 @@ export function UserBalanceCard() {
             <div className="flex items-center justify-between">
               <div>
                 <p
-                  className={`text-2xl sm:text-3xl font-bold ${
-                    priceChange! >= 0 ? "text-green-500" : "text-red-500"
-                  }`}
+                  className={`text-2xl sm:text-3xl font-bold ${priceChange! >= 0 ? "text-green-500" : "text-red-500"
+                    }`}
                 >
                   {formatPrice(tokenPrice)}
                 </p>
@@ -71,9 +75,8 @@ export function UserBalanceCard() {
               </div>
               {priceChange !== null && (
                 <div
-                  className={`flex items-center ${
-                    priceChange >= 0 ? "text-green-500" : "text-red-500"
-                  }`}
+                  className={`flex items-center ${priceChange >= 0 ? "text-green-500" : "text-red-500"
+                    }`}
                 >
                   {priceChange >= 0 ? (
                     <ArrowUpCircle className="w-4 h-4 sm:w-5 sm:h-5 mr-1" />
@@ -109,7 +112,7 @@ export function UserBalanceCard() {
                 </p>
               )}
               <p className="text-xs sm:text-sm text-muted-foreground text-white">
-                ≈ {calculateTokenAmount()} USDT
+                ≈ {calculateTokenAmount} USDT
               </p>
             </div>
           </div>

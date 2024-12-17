@@ -48,7 +48,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     setLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/transaction/${id}`);
+      const response = await fetch(`/api/withdraw/${id}`, { method: "GET" });
       if (!response.ok) {
         throw new Error('Failed to fetch transaction');
       }
@@ -104,7 +104,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
         const errorMessage = data.error;
         setError(errorMessage)
       }
-  
+
       setResponse(data);
       if (data.id) {
         setSuccess(true);
@@ -120,7 +120,7 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
     await postWithdrawal(amount);
     if (success) {
       await fetchWithdrawals();
-    } 
+    }
   };
 
   React.useEffect(() => {
@@ -128,19 +128,19 @@ export const TransactionProvider: React.FC<{ children: React.ReactNode }> = ({ c
   }, [fetchWithdrawals]);
 
   return (
-    <TransactionContext.Provider 
-      value={{ 
-        withdrawals, 
-        withdraw, 
-        loading, 
-        error, 
+    <TransactionContext.Provider
+      value={{
+        withdrawals,
+        withdraw,
+        loading,
+        error,
         success,
         response,
-        fetchWithdrawals, 
-        fetchById, 
+        fetchWithdrawals,
+        fetchById,
         updateWithdrawal,
         postWithdrawal: handlePostWithdrawal,
-        refetch: fetchWithdrawals 
+        refetch: fetchWithdrawals
       }}
     >
       {children}

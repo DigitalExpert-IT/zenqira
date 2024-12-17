@@ -3,7 +3,6 @@
 import React, { useMemo, useState } from "react";
 import { createColumnHelper } from "@tanstack/react-table";
 
-import Link from "next/link";
 import Table from "../ui/table";
 import { Badge } from "../ui/badge";
 import Pagination from "../pagination";
@@ -59,16 +58,6 @@ export const TableUserWithdraw = () => {
         },
         header: () => <div className="text-center">Status</div>,
       }),
-      columnHelper.accessor("reference", {
-        cell: info => (
-          <Link href={info.row.original.reference}>
-            <div className="min-w-[13rem] font-bold text-md text-center hover:text-blue-700">
-              {info.getValue().slice(0, 20) + "..."}
-            </div>
-          </Link>
-        ),
-        header: () => <div className="text-center">Reference</div>,
-      }),
     ],
     []
   );
@@ -102,8 +91,8 @@ export const TableUserWithdraw = () => {
   return (
     <div className="p-5 space-y-4">
       <div>
-      {/* eslint-disable-next-line */}
-      {/* @ts-expect-error */}
+        {/* eslint-disable-next-line */}
+        {/* @ts-expect-error */}
         <Table data={currentItems} columns={columns} />
       </div>
 

@@ -1,8 +1,9 @@
 import { prisma } from "@/app/api/prisma";
+import { TransactionStatus, TransactionType } from "@prisma/client";
 
 export const getUserBalance = async (email: string): Promise<number> => {
   try {
-   
+
     const user = await prisma.user.findUnique({
       where: { email },
     });
@@ -11,24 +12,25 @@ export const getUserBalance = async (email: string): Promise<number> => {
       throw new Error("User not found");
     }
 
-    const depositTransactions = await prisma.transaction.findMany({
+    const transactions = await prisma.transaction.findMany({
       where: {
         userId: user.id,
-        type: "DEPOSIT",
-        status: "SUCCESS", 
       },
     });
 
-    
-    const totalBalance = depositTransactions.reduce(
-      (acc, tx) => acc + (tx.valueToken || 0), 
-      0
-    );
+    const totalBalance = transactions.reduce((acc, tx) => {
+      if (tx.type === TransactionType.DEPOSIT && tx.status === TransactionStatus.SUCCESS) {
+        return acc + (tx.valueToken || 0);
+      } else if (tx.type === TransactionType.WITHDRAW && tx.status !== TransactionStatus.REJECTED) {
+        return acc - (tx.valueToken || 0);
+      }
+      return acc;
+    }, 0);
 
     return totalBalance;
   } catch (error) {
-        console.error("Error fetching user balance:", error);
-    
+    console.error("Error fetching user balance:", error);
+
     return 0;
   }
 };
