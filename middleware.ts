@@ -5,8 +5,8 @@ import authConfig from "./auth.config";
 import {
   publicRoutes,
   apiAuthPrefix,
-  DEFAULT_LOGIN_REDIRECT,
   authRoutes,
+  DEFAULT_LOGIN_REDIRECT,
   DEFAULT_ADMIN_ROUTES,
 } from "@/routes";
 import { NextResponse } from "next/server";
